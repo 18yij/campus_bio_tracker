@@ -4,246 +4,506 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Google Apps Script 寫入測試</title>
+  <title>校園生物資料填報</title>
 
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, "Microsoft JhengHei", sans-serif;
-      background-color: #f4f6f8;
+    * {
+      box-sizing: border-box;
     }
 
-    .container {
-      width: 90%;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 30px;
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      background: #0f1b2d;
+      color: white;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 430px;
+      background: #1d2b3f;
+      border: 1px solid #35445a;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .small-title {
+      color: #42e6a4;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
     }
 
     h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 10px;
+      font-size: 22px;
+      margin: 0 0 6px;
     }
 
-    .description {
-      text-align: center;
-      color: #666;
-      margin-bottom: 30px;
+    .subtitle {
+      margin: 0 0 22px;
+      color: #94a3b8;
+      font-size: 14px;
       line-height: 1.6;
     }
 
-    .form-group {
-      margin-bottom: 18px;
+    .api-box,
+    .gps-box {
+      background: #091225;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
     }
 
     label {
       display: block;
       margin-bottom: 7px;
+      font-size: 14px;
       font-weight: bold;
-      color: #333;
+      color: #cbd5e1;
     }
 
     input,
     textarea {
       width: 100%;
-      box-sizing: border-box;
-      padding: 11px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 1px solid #334155;
+      border-radius: 7px;
+      padding: 11px 12px;
+      background: #111c30;
+      color: white;
+      font-size: 14px;
       outline: none;
     }
 
     input:focus,
     textarea:focus {
-      border-color: #4285f4;
+      border-color: #22d3ee;
     }
 
     textarea {
-      height: 100px;
+      min-height: 90px;
       resize: vertical;
     }
 
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 10px;
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .gps-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .gps-title {
+      color: #22d3ee;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .retry-btn {
       border: none;
+      background: transparent;
+      color: #22d3ee;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+    }
+
+    #gpsStatus {
+      padding: 10px;
       border-radius: 6px;
-      background-color: #4285f4;
+      background: #101b2e;
+      border: 1px solid #26364f;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    #gpsError {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #fbbf24;
+      line-height: 1.5;
+    }
+
+    .submit-btn {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      background: #14b87a;
       color: white;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 3px;
     }
 
-    button:hover {
-      background-color: #3367d6;
+    .submit-btn:hover {
+      background: #0fa86e;
     }
 
-    button:disabled {
-      background-color: #999;
+    .submit-btn:disabled {
+      background: #64748b;
       cursor: not-allowed;
     }
 
     #result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 6px;
-      background-color: #f1f1f1;
-      color: #333;
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
       white-space: pre-wrap;
-      word-break: break-word;
+      display: none;
     }
 
     .success {
-      background-color: #e8f5e9 !important;
-      color: #1b5e20 !important;
+      display: block !important;
+      background: #123827;
+      color: #86efac;
+      border: 1px solid #22c55e;
     }
 
     .error {
-      background-color: #ffebee !important;
-      color: #b71c1c !important;
+      display: block !important;
+      background: #451a1a;
+      color: #fca5a5;
+      border: 1px solid #ef4444;
     }
 
-    .sending {
-      background-color: #fff8e1 !important;
-      color: #795548 !important;
+    @media (max-width: 600px) {
+      .page {
+        padding: 14px;
+        align-items: flex-start;
+      }
+
+      .form-card {
+        margin-top: 15px;
+        padding: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
+  <div class="page">
 
-    <h1>校園生態紀錄測試</h1>
+    <div class="form-card">
 
-    <div class="description">
-      測試前端資料是否能透過 POST<br>
-      成功寫入 Google 試算表
-    </div>
+      <div class="small-title">
+        FIELD SURVEY TOOL
+      </div>
 
-    <div class="form-group">
-      <label for="datetime">日期時間</label>
-      <input
-        type="datetime-local"
-        id="datetime"
-        required
+      <h1>
+        🌿 校園生物資料填報
+      </h1>
+
+      <p class="subtitle">
+        時間於送出時自動抓取，GPS 載入時自動偵測。
+      </p>
+
+
+      <div class="api-box">
+        <label for="apiUrl">
+          Apps Script 部署網址（Web App URL）
+        </label>
+
+        <input
+          type="text"
+          id="apiUrl"
+          value="https://script.google.com/macros/s/AKfycbxRZkfRHkOPJ3nCaT0y6et7as7wzhF_XOsV2hteKeCR/exec"
+          readonly
+        >
+      </div>
+
+
+      <div class="gps-box">
+
+        <div class="gps-title-row">
+
+          <div class="gps-title">
+            🌐 手機 GPS 定位
+          </div>
+
+          <button
+            class="retry-btn"
+            type="button"
+            onclick="getLocation()"
+          >
+            重新取得定位
+          </button>
+
+        </div>
+
+        <div id="gpsStatus">
+          正在取得定位...
+        </div>
+
+        <div id="gpsError"></div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="location">
+          校園觀察地點 *
+        </label>
+
+        <input
+          type="text"
+          id="location"
+          placeholder="例如：生態池木棧道、操場西側樹林"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="species">
+          物種名稱 *
+        </label>
+
+        <input
+          type="text"
+          id="species"
+          placeholder="例如：水鹿、黑冠麻鷺、大花咸豐草"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="quantity">
+          數量與單位 *
+        </label>
+
+        <input
+          type="text"
+          id="quantity"
+          placeholder="例如：3 隻、1 棵、大約 10 朵"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="note">
+          備註說明（選填）
+        </label>
+
+        <textarea
+          id="note"
+          placeholder="觀察紀錄，例如：成鳥正在草地覓食、群聚漂浮於水面..."
+        ></textarea>
+
+      </div>
+
+
+      <button
+        class="submit-btn"
+        id="submitButton"
+        onclick="submitForm()"
       >
-    </div>
+        📤 送出紀錄
+      </button>
 
-    <div class="form-group">
-      <label for="location">校園地點</label>
-      <input
-        type="text"
-        id="location"
-        placeholder="例如：淡江大學商管大樓"
-        value="淡江大學"
-        required
-      >
-    </div>
 
-    <div class="form-group">
-      <label for="gps">GPS</label>
-      <input
-        type="text"
-        id="gps"
-        placeholder="例如：25.1743,121.4475"
-        value="25.1743,121.4475"
-        required
-      >
-    </div>
+      <div id="result"></div>
 
-    <div class="form-group">
-      <label for="species">物種</label>
-      <input
-        type="text"
-        id="species"
-        placeholder="例如：白頭翁"
-        value="白頭翁"
-        required
-      >
-    </div>
-
-    <div class="form-group">
-      <label for="quantity">數量與單位</label>
-      <input
-        type="text"
-        id="quantity"
-        placeholder="例如：3 隻"
-        value="3 隻"
-        required
-      >
-    </div>
-
-    <div class="form-group">
-      <label for="note">備註</label>
-      <textarea
-        id="note"
-        placeholder="輸入觀察紀錄"
-      >Apps Script 測試資料</textarea>
-    </div>
-
-    <button
-      id="submitButton"
-      onclick="sendData()"
-    >
-      測試寫入 Google Sheet
-    </button>
-
-    <div id="result">
-      尚未送出資料
     </div>
 
   </div>
 
-  <script>
 
-    /*
-    ==================================================
-    Google Apps Script 正式部署網址
-    ==================================================
-    */
+  <script>
 
     const API_URL =
       "https://script.google.com/macros/s/AKfycbxRZkfRHkOPJ3nCaT0y6et7as7wzhF_XOsV2hteKeCR/exec";
 
 
-    /*
-    ==================================================
-    頁面載入後
-    自動填入目前日期時間
-    ==================================================
-    */
-
-    window.onload = function () {
-
-      const now = new Date();
-
-      const localDateTime = new Date(
-        now.getTime() - now.getTimezoneOffset() * 60000
-      )
-        .toISOString()
-        .slice(0, 16);
-
-      document.getElementById("datetime").value =
-        localDateTime;
-    };
+    let gpsValue = "";
 
 
     /*
-    ==================================================
-    傳送資料到 Google Apps Script
-    ==================================================
+    ================================
+    頁面載入時自動定位
+    ================================
     */
 
-    async function sendData() {
+    window.addEventListener(
+      "load",
+      function () {
+        getLocation();
+      }
+    );
+
+
+    /*
+    ================================
+    取得 GPS
+    ================================
+    */
+
+    function getLocation() {
+
+      const gpsStatus =
+        document.getElementById("gpsStatus");
+
+      const gpsError =
+        document.getElementById("gpsError");
+
+
+      gpsStatus.textContent =
+        "正在取得定位...";
+
+      gpsError.textContent = "";
+
+      gpsValue = "";
+
+
+      if (!navigator.geolocation) {
+
+        gpsStatus.textContent =
+          "此瀏覽器不支援 GPS 定位";
+
+        gpsError.textContent =
+          "請改用支援 Geolocation 的瀏覽器。";
+
+        return;
+      }
+
+
+      navigator.geolocation.getCurrentPosition(
+
+        function (position) {
+
+          const latitude =
+            position.coords.latitude;
+
+          const longitude =
+            position.coords.longitude;
+
+
+          gpsValue =
+            latitude.toFixed(6) +
+            "," +
+            longitude.toFixed(6);
+
+
+          gpsStatus.textContent =
+            "定位成功：" + gpsValue;
+
+          gpsError.textContent = "";
+
+        },
+
+
+        function (error) {
+
+          gpsStatus.textContent =
+            "未取得（定位失敗）";
+
+
+          let message =
+            "定位失敗：";
+
+
+          switch (error.code) {
+
+            case error.PERMISSION_DENIED:
+
+              message +=
+                "你拒絕了定位權限。請允許瀏覽器取得位置。";
+
+              break;
+
+
+            case error.POSITION_UNAVAILABLE:
+
+              message +=
+                "目前無法取得位置資訊。";
+
+              break;
+
+
+            case error.TIMEOUT:
+
+              message +=
+                "定位逾時，請重新取得。";
+
+              break;
+
+
+            default:
+
+              message +=
+                "發生未知錯誤。";
+
+          }
+
+
+          gpsError.textContent =
+            "⚠ " + message;
+
+        },
+
+
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+
+      );
+
+    }
+
+
+    /*
+    ================================
+    送出表單
+    ================================
+    */
+
+    async function submitForm() {
+
+      const location =
+        document.getElementById("location")
+          .value
+          .trim();
+
+      const species =
+        document.getElementById("species")
+          .value
+          .trim();
+
+      const quantity =
+        document.getElementById("quantity")
+          .value
+          .trim();
+
+      const note =
+        document.getElementById("note")
+          .value
+          .trim();
 
       const resultBox =
         document.getElementById("result");
@@ -253,91 +513,106 @@
 
 
       /*
-      取得表單資料
+      必填檢查
       */
-
-      const datetime =
-        document.getElementById("datetime").value;
-
-      const location =
-        document.getElementById("location").value.trim();
-
-      const gps =
-        document.getElementById("gps").value.trim();
-
-      const species =
-        document.getElementById("species").value.trim();
-
-      const quantity =
-        document.getElementById("quantity").value.trim();
-
-      const note =
-        document.getElementById("note").value.trim();
-
-
-      /*
-      檢查必要欄位
-      */
-
-      if (!datetime) {
-        showError("請輸入日期時間。");
-        return;
-      }
 
       if (!location) {
-        showError("請輸入校園地點。");
+
+        showError(
+          "請輸入校園觀察地點。"
+        );
+
         return;
       }
 
-      if (!gps) {
-        showError("請輸入 GPS。");
-        return;
-      }
 
       if (!species) {
-        showError("請輸入物種。");
+
+        showError(
+          "請輸入物種名稱。"
+        );
+
         return;
       }
 
+
       if (!quantity) {
-        showError("請輸入數量與單位。");
+
+        showError(
+          "請輸入數量與單位。"
+        );
+
         return;
       }
 
 
       /*
-      建立要送出的 JSON 資料
+      送出當下時間
+      */
+
+      const now =
+        new Date();
+
+      const datetime =
+        now.toLocaleString(
+          "zh-TW",
+          {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+          }
+        );
+
+
+      /*
+      JSON 資料
       */
 
       const data = {
+
         datetime: datetime,
+
         location: location,
-        gps: gps,
+
+        gps:
+          gpsValue ||
+          "未取得 GPS",
+
         species: species,
+
         quantity: quantity,
+
         note: note
+
       };
 
 
-      console.log("準備傳送的資料：", data);
-
-
       /*
-      顯示傳送狀態
+      顯示送出中
       */
 
-      resultBox.className = "sending";
+      resultBox.className = "";
+
+      resultBox.style.display =
+        "block";
 
       resultBox.textContent =
-        "資料傳送中...\n\n" +
-        JSON.stringify(data, null, 2);
+        "資料傳送中...";
 
-      submitButton.disabled = true;
-      submitButton.textContent = "傳送中...";
+
+      submitButton.disabled =
+        true;
+
+      submitButton.textContent =
+        "傳送中...";
 
 
       /*
-      POST 到 Google Apps Script
+      POST 到 Apps Script
       */
 
       try {
@@ -346,94 +621,95 @@
           await fetch(
             API_URL,
             {
+
               method: "POST",
 
               headers: {
-                "Content-Type": "text/plain;charset=utf-8"
+                "Content-Type":
+                  "text/plain;charset=utf-8"
               },
 
-              body: JSON.stringify(data)
+              body:
+                JSON.stringify(data)
+
             }
           );
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            "HTTP 錯誤：" + response.status
-          );
-
-        }
 
 
         const result =
           await response.json();
 
 
-        console.log(
-          "Apps Script 回傳：",
-          result
-        );
-
-
-        /*
-        判斷是否成功
-        */
-
         if (result.success) {
 
-          resultBox.className = "success";
+          resultBox.className =
+            "success";
 
           resultBox.textContent =
-            "✅ 寫入成功！\n\n" +
-            "Apps Script 回傳：\n" +
-            JSON.stringify(result, null, 2);
+            "✅ 資料寫入成功！\n" +
+            "試算表第 " +
+            result.row +
+            " 列";
+
+
+          /*
+          清空欄位
+          */
+
+          document.getElementById(
+            "location"
+          ).value = "";
+
+          document.getElementById(
+            "species"
+          ).value = "";
+
+          document.getElementById(
+            "quantity"
+          ).value = "";
+
+          document.getElementById(
+            "note"
+          ).value = "";
 
         } else {
 
-          resultBox.className = "error";
-
-          resultBox.textContent =
-            "❌ Apps Script 回傳錯誤\n\n" +
-            JSON.stringify(result, null, 2);
+          throw new Error(
+            result.message ||
+            "Apps Script 回傳失敗"
+          );
 
         }
 
 
       } catch (error) {
 
-        console.error(
-          "傳送錯誤：",
-          error
-        );
+        console.error(error);
 
-        resultBox.className = "error";
 
-        resultBox.textContent =
-          "❌ 無法成功傳送資料\n\n" +
-          "錯誤訊息：\n" +
+        showError(
+          "資料送出失敗。\n\n" +
           error.message +
-          "\n\n請確認：\n" +
-          "1. Apps Script 已部署為網頁應用程式\n" +
-          "2. 部署網址結尾是 /exec\n" +
-          "3. 存取權限設定為「任何人」\n" +
-          "4. Apps Script 程式沒有錯誤\n" +
-          "5. 重新部署後有使用最新的部署版本";
+          "\n\n請確認 Apps Script 已正式部署，且權限設定正確。"
+        );
 
       } finally {
 
-        submitButton.disabled = false;
+        submitButton.disabled =
+          false;
 
         submitButton.textContent =
-          "測試寫入 Google Sheet";
+          "📤 送出紀錄";
+
       }
+
     }
 
 
     /*
-    ==================================================
-    顯示錯誤
-    ==================================================
+    ================================
+    錯誤訊息
+    ================================
     */
 
     function showError(message) {
@@ -441,10 +717,12 @@
       const resultBox =
         document.getElementById("result");
 
-      resultBox.className = "error";
+      resultBox.className =
+        "error";
 
       resultBox.textContent =
         "❌ " + message;
+
     }
 
   </script>
