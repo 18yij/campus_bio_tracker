@@ -1,191 +1,453 @@
-在網頁載入時自動啟動手機定位，並在點擊「提交送出（Submit）」瞬間自動抓取當下的日期時間，使用者只需手動輸入地點、物種、數量與備註。 
-
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>校園生態調查快速記錄工具</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <title>Google Apps Script 寫入測試</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      background-color: #f4f6f8;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #4285f4;
+    }
+
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: #4285f4;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #3367d6;
+    }
+
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      background-color: #f1f1f1;
+      color: #333;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .success {
+      background-color: #e8f5e9 !important;
+      color: #1b5e20 !important;
+    }
+
+    .error {
+      background-color: #ffebee !important;
+      color: #b71c1c !important;
+    }
+
+    .sending {
+      background-color: #fff8e1 !important;
+      color: #795548 !important;
+    }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
 
-  <div class="max-w-md w-full bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-2xl space-y-4">
-    
-    <!-- 標題區 -->
-    <div>
-      <span class="text-xs font-bold text-emerald-400 tracking-wider uppercase">Field Survey Tool</span>
-      <h1 class="text-xl font-bold text-white mt-0.5">🌿 校園生物資料填報</h1>
-      <p class="text-xs text-slate-400 mt-1">時間於送出時自動抓取，GPS 載入時自動偵測。</p>
+<body>
+
+  <div class="container">
+
+    <h1>校園生態紀錄測試</h1>
+
+    <div class="description">
+      測試前端資料是否能透過 POST<br>
+      成功寫入 Google 試算表
     </div>
 
-    <!-- GAS 網址設定 -->
-    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-      <label class="block text-[11px] text-slate-400 mb-1">Apps Script 部署網址 (Web App URL)</label>
-      <input type="url" id="gasUrl" 
-        placeholder="https://script.google.com/macros/s/.../exec" 
-        class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200 outline-none focus:border-emerald-500 font-mono">
+    <div class="form-group">
+      <label for="datetime">日期時間</label>
+      <input
+        type="datetime-local"
+        id="datetime"
+        required
+      >
     </div>
 
-    <!-- 調查表單 -->
-    <form id="recordForm" class="space-y-3.5">
-      
-      <!-- GPS 定位狀態（自動獲取，亦可手動重整） -->
-      <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-700/60">
-        <div class="flex justify-between items-center mb-1">
-          <span class="text-xs font-semibold text-cyan-400">🌐 手機 GPS 定位</span>
-          <button type="button" onclick="autoGetGPS()" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline">
-            重新取得定位
-          </button>
-        </div>
-        <input type="text" id="gpsField" readonly placeholder="正在抓取手機 GPS 經緯度..." 
-          class="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs font-mono text-emerald-400 outline-none">
-        <p id="gpsStatus" class="text-[10px] text-slate-400 mt-1">📡 頁面已自動啟動定位服務...</p>
-      </div>
+    <div class="form-group">
+      <label for="location">校園地點</label>
+      <input
+        type="text"
+        id="location"
+        placeholder="例如：淡江大學商管大樓"
+        value="淡江大學"
+        required
+      >
+    </div>
 
-      <!-- 校園地點 -->
-      <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1">校園觀察地點 <span class="text-rose-400">*</span></label>
-        <input type="text" id="locationField" required placeholder="例如：生態池木棧道、操場西側樹林" 
-          class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white outline-none focus:border-emerald-500">
-      </div>
+    <div class="form-group">
+      <label for="gps">GPS</label>
+      <input
+        type="text"
+        id="gps"
+        placeholder="例如：25.1743,121.4475"
+        value="25.1743,121.4475"
+        required
+      >
+    </div>
 
-      <!-- 物種名稱 -->
-      <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1">物種名稱 <span class="text-rose-400">*</span></label>
-        <input type="text" id="speciesField" required placeholder="例如：水黽、黑冠麻鷺、大花咸豐草" 
-          class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white outline-none focus:border-emerald-500">
-      </div>
+    <div class="form-group">
+      <label for="species">物種</label>
+      <input
+        type="text"
+        id="species"
+        placeholder="例如：白頭翁"
+        value="白頭翁"
+        required
+      >
+    </div>
 
-      <!-- 數量與單位 -->
-      <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1">數量與單位 <span class="text-rose-400">*</span></label>
-        <input type="text" id="quantityField" required placeholder="例如：3 隻、1 棵、大約 10 朵" 
-          class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white outline-none focus:border-emerald-500">
-      </div>
+    <div class="form-group">
+      <label for="quantity">數量與單位</label>
+      <input
+        type="text"
+        id="quantity"
+        placeholder="例如：3 隻"
+        value="3 隻"
+        required
+      >
+    </div>
 
-      <!-- 備註 -->
-      <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1">備註說明 (選填)</label>
-        <textarea id="notesField" rows="2" placeholder="觀察紀錄，如：成鳥正在草地覓食、群聚漂浮於水面..." 
-          class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none focus:border-emerald-500"></textarea>
-      </div>
+    <div class="form-group">
+      <label for="note">備註</label>
+      <textarea
+        id="note"
+        placeholder="輸入觀察紀錄"
+      >Apps Script 測試資料</textarea>
+    </div>
 
-      <!-- 提交按鈕 -->
-      <button type="submit" id="submitBtn" 
-        class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl text-sm shadow-lg transition active:scale-98">
-        📤 送出紀錄 (自動記下時間與座標)
-      </button>
-    </form>
+    <button
+      id="submitButton"
+      onclick="sendData()"
+    >
+      測試寫入 Google Sheet
+    </button>
 
-    <!-- 狀態反饋提示 -->
-    <div id="statusAlert" class="hidden text-center text-xs p-3 rounded-lg border"></div>
+    <div id="result">
+      尚未送出資料
+    </div>
 
   </div>
 
   <script>
-    const gasInput = document.getElementById('gasUrl');
-    const gpsField = document.getElementById('gpsField');
-    const gpsStatus = document.getElementById('gpsStatus');
-    const statusAlert = document.getElementById('statusAlert');
-    const submitBtn = document.getElementById('submitBtn');
 
-    // 1. 自動載入先前存過的 GAS 網址
-    const savedUrl = localStorage.getItem('last_gas_url');
-    if (savedUrl) gasInput.value = savedUrl;
+    /*
+    ==================================================
+    Google Apps Script 正式部署網址
+    ==================================================
+    */
 
-    // 2. 手機 GPS 自動取得函式
-    function autoGetGPS() {
-      if (!navigator.geolocation) {
-        gpsStatus.innerText = "❌ 此裝置或瀏覽器不支援定位。";
-        gpsField.value = "未取得 (不支援)";
-        return;
-      }
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbxRZkfRHkOPJ3nCaT0y6et7as7wzhF_XOsV2hteKeCR/exec";
 
-      gpsStatus.innerText = "📡 正在定位中，請允許瀏覽器存取位置權限...";
-      gpsStatus.className = "text-[10px] text-amber-400 mt-1";
 
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude.toFixed(6);
-          const lng = pos.coords.longitude.toFixed(6);
-          const acc = pos.coords.accuracy.toFixed(1);
-          
-          gpsField.value = `${lat}, ${lng}`;
-          gpsStatus.innerText = `✅ 定位成功！誤差半徑約 ±${acc} 公尺`;
-          gpsStatus.className = "text-[10px] text-emerald-400 mt-1";
-        },
-        (err) => {
-          gpsStatus.innerText = `⚠️ 定位失敗: ${err.message} (請確認開啟手機定位服務與 HTTPS)`;
-          gpsStatus.className = "text-[10px] text-rose-400 mt-1";
-          gpsField.value = "未取得 (定位失敗)";
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    }
+    /*
+    ==================================================
+    頁面載入後
+    自動填入目前日期時間
+    ==================================================
+    */
 
-    // 網頁載入時自動執行一次定位
-    window.addEventListener('DOMContentLoaded', autoGetGPS);
+    window.onload = function () {
 
-    // 3. 表單送出處理
-    document.getElementById('recordForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const url = gasInput.value.trim();
-      if (!url) {
-        alert("請先輸入您的 Google Apps Script 部署網址！");
-        return;
-      }
-      localStorage.setItem('last_gas_url', url);
-
-      // 送出時「當下」自動生成本地標準時間字串 (格式: YYYY-MM-DD HH:MM:SS)
       const now = new Date();
-      const timestamp = now.getFullYear() + "-" + 
-        String(now.getMonth() + 1).padStart(2, '0') + "-" + 
-        String(now.getDate()).padStart(2, '0') + " " + 
-        String(now.getHours()).padStart(2, '0') + ":" + 
-        String(now.getMinutes()).padStart(2, '0') + ":" + 
-        String(now.getSeconds()).padStart(2, '0');
 
-      const payload = {
-        datetime: timestamp,
-        location: document.getElementById('locationField').value.trim(),
-        gps: gpsField.value || "未記錄",
-        species: document.getElementById('speciesField').value.trim(),
-        quantity: document.getElementById('quantityField').value.trim(),
-        notes: document.getElementById('notesField').value.trim()
+      const localDateTime = new Date(
+        now.getTime() - now.getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .slice(0, 16);
+
+      document.getElementById("datetime").value =
+        localDateTime;
+    };
+
+
+    /*
+    ==================================================
+    傳送資料到 Google Apps Script
+    ==================================================
+    */
+
+    async function sendData() {
+
+      const resultBox =
+        document.getElementById("result");
+
+      const submitButton =
+        document.getElementById("submitButton");
+
+
+      /*
+      取得表單資料
+      */
+
+      const datetime =
+        document.getElementById("datetime").value;
+
+      const location =
+        document.getElementById("location").value.trim();
+
+      const gps =
+        document.getElementById("gps").value.trim();
+
+      const species =
+        document.getElementById("species").value.trim();
+
+      const quantity =
+        document.getElementById("quantity").value.trim();
+
+      const note =
+        document.getElementById("note").value.trim();
+
+
+      /*
+      檢查必要欄位
+      */
+
+      if (!datetime) {
+        showError("請輸入日期時間。");
+        return;
+      }
+
+      if (!location) {
+        showError("請輸入校園地點。");
+        return;
+      }
+
+      if (!gps) {
+        showError("請輸入 GPS。");
+        return;
+      }
+
+      if (!species) {
+        showError("請輸入物種。");
+        return;
+      }
+
+      if (!quantity) {
+        showError("請輸入數量與單位。");
+        return;
+      }
+
+
+      /*
+      建立要送出的 JSON 資料
+      */
+
+      const data = {
+        datetime: datetime,
+        location: location,
+        gps: gps,
+        species: species,
+        quantity: quantity,
+        note: note
       };
 
-      submitBtn.disabled = true;
-      submitBtn.innerText = "⏳ 正在傳輸至試算表...";
+
+      console.log("準備傳送的資料：", data);
+
+
+      /*
+      顯示傳送狀態
+      */
+
+      resultBox.className = "sending";
+
+      resultBox.textContent =
+        "資料傳送中...\n\n" +
+        JSON.stringify(data, null, 2);
+
+      submitButton.disabled = true;
+      submitButton.textContent = "傳送中...";
+
+
+      /*
+      POST 到 Google Apps Script
+      */
 
       try {
-        await fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
 
-        statusAlert.className = "text-center text-xs p-3 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700 block";
-        statusAlert.innerText = `🎉 寫入成功！時間：${timestamp}`;
+        const response =
+          await fetch(
+            API_URL,
+            {
+              method: "POST",
 
-        // 清空打字輸入框，保留 GPS 座標
-        document.getElementById('locationField').value = '';
-        document.getElementById('speciesField').value = '';
-        document.getElementById('quantityField').value = '';
-        document.getElementById('notesField').value = '';
+              headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+              },
 
-        // 重新更新一次 GPS 定位
-        autoGetGPS();
-      } catch (err) {
-        statusAlert.className = "text-center text-xs p-3 rounded-lg bg-rose-950 text-rose-300 border border-rose-700 block";
-        statusAlert.innerText = `❌ 傳送失敗: ${err.message}`;
+              body: JSON.stringify(data)
+            }
+          );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "HTTP 錯誤：" + response.status
+          );
+
+        }
+
+
+        const result =
+          await response.json();
+
+
+        console.log(
+          "Apps Script 回傳：",
+          result
+        );
+
+
+        /*
+        判斷是否成功
+        */
+
+        if (result.success) {
+
+          resultBox.className = "success";
+
+          resultBox.textContent =
+            "✅ 寫入成功！\n\n" +
+            "Apps Script 回傳：\n" +
+            JSON.stringify(result, null, 2);
+
+        } else {
+
+          resultBox.className = "error";
+
+          resultBox.textContent =
+            "❌ Apps Script 回傳錯誤\n\n" +
+            JSON.stringify(result, null, 2);
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "傳送錯誤：",
+          error
+        );
+
+        resultBox.className = "error";
+
+        resultBox.textContent =
+          "❌ 無法成功傳送資料\n\n" +
+          "錯誤訊息：\n" +
+          error.message +
+          "\n\n請確認：\n" +
+          "1. Apps Script 已部署為網頁應用程式\n" +
+          "2. 部署網址結尾是 /exec\n" +
+          "3. 存取權限設定為「任何人」\n" +
+          "4. Apps Script 程式沒有錯誤\n" +
+          "5. 重新部署後有使用最新的部署版本";
+
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "📤 送出紀錄 (自動記下時間與座標)";
+
+        submitButton.disabled = false;
+
+        submitButton.textContent =
+          "測試寫入 Google Sheet";
       }
-    });
+    }
+
+
+    /*
+    ==================================================
+    顯示錯誤
+    ==================================================
+    */
+
+    function showError(message) {
+
+      const resultBox =
+        document.getElementById("result");
+
+      resultBox.className = "error";
+
+      resultBox.textContent =
+        "❌ " + message;
+    }
+
   </script>
+
 </body>
 </html>
