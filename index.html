@@ -203,6 +203,13 @@
 
 <body>
 
+  <!-- 隱藏 iframe，用來接收 Apps Script 回應 -->
+  <iframe
+    name="hidden_iframe"
+    id="hidden_iframe"
+    style="display:none;">
+  </iframe>
+
   <div class="page">
 
     <div class="form-card">
@@ -477,7 +484,7 @@
     ==========================================
     */
 
-    async function submitForm() {
+    function submitForm() {
 
       const location =
         document
@@ -517,43 +524,30 @@
       */
 
       if (!location) {
-
-        showError(
-          "請輸入校園觀察地點。"
-        );
-
+        showError("請輸入校園觀察地點。");
         return;
       }
 
 
       if (!species) {
-
-        showError(
-          "請輸入物種名稱。"
-        );
-
+        showError("請輸入物種名稱。");
         return;
       }
 
 
       if (!quantity) {
-
-        showError(
-          "請輸入數量與單位。"
-        );
-
+        showError("請輸入數量與單位。");
         return;
       }
 
 
       /*
       ==========================================
-      取得送出當下時間
+      取得送出時間
       ==========================================
       */
 
-      const now =
-        new Date();
+      const now = new Date();
 
 
       const datetime =
@@ -573,7 +567,53 @@
 
       /*
       ==========================================
-      建立要送出的 JSON
+      顯示送出中
+      ==========================================
+      */
+
+      resultBox.className =
+        "sending";
+
+      resultBox.textContent =
+        "資料傳送中...";
+
+
+      submitButton.disabled =
+        true;
+
+      submitButton.textContent =
+        "傳送中...";
+
+
+      /*
+      ==========================================
+      建立隱藏 form
+      ==========================================
+      */
+
+      const form =
+        document.createElement("form");
+
+
+      form.method =
+        "POST";
+
+
+      form.action =
+        API_URL;
+
+
+      form.target =
+        "hidden_iframe";
+
+
+      form.style.display =
+        "none";
+
+
+      /*
+      ==========================================
+      要送出的資料
       ==========================================
       */
 
@@ -596,123 +636,125 @@
       };
 
 
-      console.log(
-        "準備送出的資料：",
-        data
+      /*
+      ==========================================
+      把資料轉成 hidden input
+      ==========================================
+      */
+
+      Object.keys(data).forEach(
+
+        function (key) {
+
+          const input =
+            document.createElement("input");
+
+
+          input.type =
+            "hidden";
+
+
+          input.name =
+            key;
+
+
+          input.value =
+            data[key];
+
+
+          form.appendChild(input);
+
+        }
+
       );
 
 
       /*
       ==========================================
-      顯示傳送中
+      將 form 加入頁面
       ==========================================
       */
 
-      resultBox.className =
-        "sending";
-
-      resultBox.textContent =
-        "資料傳送中...";
-
-      submitButton.disabled =
-        true;
-
-      submitButton.textContent =
-        "傳送中...";
+      document.body.appendChild(
+        form
+      );
 
 
       /*
       ==========================================
-      傳送到 Google Apps Script
+      送出 POST
       ==========================================
       */
 
-      try {
-
-        await fetch(
-          API_URL,
-          {
-            method: "POST",
-
-            /*
-            使用 no-cors
-            避免 GitHub Pages 跨網域讀取失敗
-            */
-
-            mode: "no-cors",
-
-            headers: {
-              "Content-Type":
-                "text/plain;charset=utf-8"
-            },
-
-            body:
-              JSON.stringify(data)
-          }
-        );
+      form.submit();
 
 
-        /*
-        ==========================================
-        no-cors 模式無法讀取 Apps Script 回傳內容
-        所以這裡只代表請求已成功送出
-        ==========================================
-        */
+      /*
+      ==========================================
+      稍等後顯示完成
+      ==========================================
+      */
 
-        resultBox.className =
-          "success";
+      setTimeout(
 
-        resultBox.textContent =
-          "✅ 資料已送出！\n\n" +
-          "請到 Google Sheet 確認是否新增資料。";
+        function () {
 
-
-        /*
-        ==========================================
-        清空表單
-        ==========================================
-        */
-
-        document.getElementById(
-          "location"
-        ).value = "";
-
-        document.getElementById(
-          "species"
-        ).value = "";
-
-        document.getElementById(
-          "quantity"
-        ).value = "";
-
-        document.getElementById(
-          "note"
-        ).value = "";
+          resultBox.className =
+            "success";
 
 
-      } catch (error) {
-
-        console.error(
-          "傳送錯誤：",
-          error
-        );
+          resultBox.textContent =
+            "✅ 資料已送出！\n\n" +
+            "請到 Google Sheet 確認是否已新增資料。";
 
 
-        showError(
-          "資料送出失敗。\n\n" +
-          "錯誤訊息：" +
-          error.message
-        );
+          /*
+          清空輸入欄位
+          */
 
-      } finally {
+          document.getElementById(
+            "location"
+          ).value = "";
 
-        submitButton.disabled =
-          false;
 
-        submitButton.textContent =
-          "📤 送出紀錄";
+          document.getElementById(
+            "species"
+          ).value = "";
 
-      }
+
+          document.getElementById(
+            "quantity"
+          ).value = "";
+
+
+          document.getElementById(
+            "note"
+          ).value = "";
+
+
+          /*
+          恢復按鈕
+          */
+
+          submitButton.disabled =
+            false;
+
+
+          submitButton.textContent =
+            "📤 送出紀錄";
+
+
+          /*
+          移除暫時建立的 form
+          */
+
+          form.remove();
+
+        },
+
+        1500
+
+      );
 
     }
 
@@ -728,8 +770,10 @@
       const resultBox =
         document.getElementById("result");
 
+
       resultBox.className =
         "error";
+
 
       resultBox.textContent =
         "❌ " + message;
