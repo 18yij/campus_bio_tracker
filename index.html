@@ -224,7 +224,7 @@
         <div class="gps-title-row">
 
           <div class="gps-title">
-            🌐 GPS 定位
+            🌐 手機 GPS 定位
           </div>
 
           <button
@@ -246,6 +246,7 @@
       </div>
 
       <div class="form-group">
+
         <label for="location">
           校園觀察地點 *
         </label>
@@ -255,9 +256,11 @@
           id="location"
           placeholder="例如：生態池木棧道、操場西側樹林"
         >
+
       </div>
 
       <div class="form-group">
+
         <label for="species">
           物種名稱 *
         </label>
@@ -267,9 +270,11 @@
           id="species"
           placeholder="例如：白頭翁"
         >
+
       </div>
 
       <div class="form-group">
+
         <label for="quantity">
           數量與單位 *
         </label>
@@ -279,17 +284,20 @@
           id="quantity"
           placeholder="例如：3 隻、1 棵、大約 10 朵"
         >
+
       </div>
 
       <div class="form-group">
+
         <label for="note">
-          備註（選填）
+          備註說明（選填）
         </label>
 
         <textarea
           id="note"
           placeholder="例如：停留在樹枝上、正在草地覓食..."
         ></textarea>
+
       </div>
 
       <button
@@ -306,6 +314,7 @@
 
   </div>
 
+
   <script>
 
     /*
@@ -315,7 +324,7 @@
     */
 
     const API_URL =
-      "https://script.google.com/macros/s/AKfycbxRZkfRHkOPJ3nCaT0y6et7as7wzhF_XOsV2hteKeCR/exec";
+      "https://script.google.com/macros/s/AKfycbxVsLnqRp6dcLUBcHYCuIEixSGCs-7Vc8Y-VeiBAerXxw-j3k3tmVykckMS2yeM6I9SRw/exec";
 
 
     /*
@@ -329,7 +338,7 @@
 
     /*
     ==========================================
-    頁面載入後自動定位
+    頁面載入後自動取得 GPS
     ==========================================
     */
 
@@ -441,6 +450,7 @@
 
               message +=
                 "發生未知錯誤。";
+
           }
 
 
@@ -502,22 +512,36 @@
 
       /*
       ==========================================
-      檢查必填欄位
+      必填欄位檢查
       ==========================================
       */
 
       if (!location) {
-        showError("請輸入校園觀察地點。");
+
+        showError(
+          "請輸入校園觀察地點。"
+        );
+
         return;
       }
+
 
       if (!species) {
-        showError("請輸入物種名稱。");
+
+        showError(
+          "請輸入物種名稱。"
+        );
+
         return;
       }
 
+
       if (!quantity) {
-        showError("請輸入數量與單位。");
+
+        showError(
+          "請輸入數量與單位。"
+        );
+
         return;
       }
 
@@ -549,7 +573,7 @@
 
       /*
       ==========================================
-      建立 JSON
+      建立要送出的 JSON
       ==========================================
       */
 
@@ -599,7 +623,7 @@
 
       /*
       ==========================================
-      傳送到 Apps Script
+      傳送到 Google Apps Script
       ==========================================
       */
 
@@ -611,9 +635,8 @@
             method: "POST",
 
             /*
-            關鍵：
-            使用 no-cors 避免 GitHub Pages
-            呼叫 Apps Script 時出現 Load failed
+            使用 no-cors
+            避免 GitHub Pages 跨網域讀取失敗
             */
 
             mode: "no-cors",
@@ -630,13 +653,10 @@
 
 
         /*
-        ========================================
-        因為 no-cors 無法讀取 Apps Script 回應
-        所以這裡只能確認「瀏覽器已送出請求」
-
-        是否真的成功寫入：
-        請到 Google Sheet 確認
-        ========================================
+        ==========================================
+        no-cors 模式無法讀取 Apps Script 回傳內容
+        所以這裡只代表請求已成功送出
+        ==========================================
         */
 
         resultBox.className =
@@ -648,9 +668,9 @@
 
 
         /*
-        ========================================
+        ==========================================
         清空表單
-        ========================================
+        ==========================================
         */
 
         document.getElementById(
@@ -679,7 +699,7 @@
 
 
         showError(
-          "送出失敗。\n\n" +
+          "資料送出失敗。\n\n" +
           "錯誤訊息：" +
           error.message
         );
