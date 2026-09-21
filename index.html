@@ -56,7 +56,6 @@
       line-height: 1.6;
     }
 
-    .api-box,
     .gps-box {
       background: #091225;
       border-radius: 12px;
@@ -181,6 +180,13 @@
       border: 1px solid #ef4444;
     }
 
+    .sending {
+      display: block !important;
+      background: #3a2d12;
+      color: #fde68a;
+      border: 1px solid #f59e0b;
+    }
+
     @media (max-width: 600px) {
       .page {
         padding: 14px;
@@ -213,27 +219,12 @@
         時間於送出時自動抓取，GPS 載入時自動偵測。
       </p>
 
-
-      <div class="api-box">
-        <label for="apiUrl">
-          Apps Script 部署網址（Web App URL）
-        </label>
-
-        <input
-          type="text"
-          id="apiUrl"
-          value="https://script.google.com/macros/s/AKfycbxRZkfRHkOPJ3nCaT0y6et7as7wzhF_XOsV2hteKeCR/exec"
-          readonly
-        >
-      </div>
-
-
       <div class="gps-box">
 
         <div class="gps-title-row">
 
           <div class="gps-title">
-            🌐 手機 GPS 定位
+            🌐 GPS 定位
           </div>
 
           <button
@@ -254,9 +245,7 @@
 
       </div>
 
-
       <div class="form-group">
-
         <label for="location">
           校園觀察地點 *
         </label>
@@ -265,14 +254,10 @@
           type="text"
           id="location"
           placeholder="例如：生態池木棧道、操場西側樹林"
-          required
         >
-
       </div>
 
-
       <div class="form-group">
-
         <label for="species">
           物種名稱 *
         </label>
@@ -280,15 +265,11 @@
         <input
           type="text"
           id="species"
-          placeholder="例如：水鹿、黑冠麻鷺、大花咸豐草"
-          required
+          placeholder="例如：白頭翁"
         >
-
       </div>
 
-
       <div class="form-group">
-
         <label for="quantity">
           數量與單位 *
         </label>
@@ -297,25 +278,19 @@
           type="text"
           id="quantity"
           placeholder="例如：3 隻、1 棵、大約 10 朵"
-          required
         >
-
       </div>
 
-
       <div class="form-group">
-
         <label for="note">
-          備註說明（選填）
+          備註（選填）
         </label>
 
         <textarea
           id="note"
-          placeholder="觀察紀錄，例如：成鳥正在草地覓食、群聚漂浮於水面..."
+          placeholder="例如：停留在樹枝上、正在草地覓食..."
         ></textarea>
-
       </div>
-
 
       <button
         class="submit-btn"
@@ -325,27 +300,37 @@
         📤 送出紀錄
       </button>
 
-
       <div id="result"></div>
 
     </div>
 
   </div>
 
-
   <script>
+
+    /*
+    ==========================================
+    Google Apps Script 正式部署網址
+    ==========================================
+    */
 
     const API_URL =
       "https://script.google.com/macros/s/AKfycbxRZkfRHkOPJ3nCaT0y6et7as7wzhF_XOsV2hteKeCR/exec";
 
 
+    /*
+    ==========================================
+    GPS 儲存變數
+    ==========================================
+    */
+
     let gpsValue = "";
 
 
     /*
-    ================================
-    頁面載入時自動定位
-    ================================
+    ==========================================
+    頁面載入後自動定位
+    ==========================================
     */
 
     window.addEventListener(
@@ -357,9 +342,9 @@
 
 
     /*
-    ================================
+    ==========================================
     取得 GPS
-    ================================
+    ==========================================
     */
 
     function getLocation() {
@@ -385,7 +370,7 @@
           "此瀏覽器不支援 GPS 定位";
 
         gpsError.textContent =
-          "請改用支援 Geolocation 的瀏覽器。";
+          "請改用支援定位功能的瀏覽器。";
 
         return;
       }
@@ -419,7 +404,7 @@
         function (error) {
 
           gpsStatus.textContent =
-            "未取得（定位失敗）";
+            "未取得 GPS";
 
 
           let message =
@@ -431,7 +416,7 @@
             case error.PERMISSION_DENIED:
 
               message +=
-                "你拒絕了定位權限。請允許瀏覽器取得位置。";
+                "你拒絕了定位權限。";
 
               break;
 
@@ -447,7 +432,7 @@
             case error.TIMEOUT:
 
               message +=
-                "定位逾時，請重新取得。";
+                "定位逾時，請重新嘗試。";
 
               break;
 
@@ -456,7 +441,6 @@
 
               message +=
                 "發生未知錯誤。";
-
           }
 
 
@@ -478,30 +462,34 @@
 
 
     /*
-    ================================
+    ==========================================
     送出表單
-    ================================
+    ==========================================
     */
 
     async function submitForm() {
 
       const location =
-        document.getElementById("location")
+        document
+          .getElementById("location")
           .value
           .trim();
 
       const species =
-        document.getElementById("species")
+        document
+          .getElementById("species")
           .value
           .trim();
 
       const quantity =
-        document.getElementById("quantity")
+        document
+          .getElementById("quantity")
           .value
           .trim();
 
       const note =
-        document.getElementById("note")
+        document
+          .getElementById("note")
           .value
           .trim();
 
@@ -513,45 +501,36 @@
 
 
       /*
-      必填檢查
+      ==========================================
+      檢查必填欄位
+      ==========================================
       */
 
       if (!location) {
-
-        showError(
-          "請輸入校園觀察地點。"
-        );
-
+        showError("請輸入校園觀察地點。");
         return;
       }
-
 
       if (!species) {
-
-        showError(
-          "請輸入物種名稱。"
-        );
-
+        showError("請輸入物種名稱。");
         return;
       }
 
-
       if (!quantity) {
-
-        showError(
-          "請輸入數量與單位。"
-        );
-
+        showError("請輸入數量與單位。");
         return;
       }
 
 
       /*
-      送出當下時間
+      ==========================================
+      取得送出當下時間
+      ==========================================
       */
 
       const now =
         new Date();
+
 
       const datetime =
         now.toLocaleString(
@@ -569,7 +548,9 @@
 
 
       /*
-      JSON 資料
+      ==========================================
+      建立 JSON
+      ==========================================
       */
 
       const data = {
@@ -591,18 +572,23 @@
       };
 
 
+      console.log(
+        "準備送出的資料：",
+        data
+      );
+
+
       /*
-      顯示送出中
+      ==========================================
+      顯示傳送中
+      ==========================================
       */
 
-      resultBox.className = "";
-
-      resultBox.style.display =
-        "block";
+      resultBox.className =
+        "sending";
 
       resultBox.textContent =
         "資料傳送中...";
-
 
       submitButton.disabled =
         true;
@@ -612,85 +598,90 @@
 
 
       /*
-      POST 到 Apps Script
+      ==========================================
+      傳送到 Apps Script
+      ==========================================
       */
 
       try {
 
-        const response =
-          await fetch(
-            API_URL,
-            {
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
 
-              method: "POST",
+            /*
+            關鍵：
+            使用 no-cors 避免 GitHub Pages
+            呼叫 Apps Script 時出現 Load failed
+            */
 
-              headers: {
-                "Content-Type":
-                  "text/plain;charset=utf-8"
-              },
+            mode: "no-cors",
 
-              body:
-                JSON.stringify(data)
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
 
-            }
-          );
-
-
-        const result =
-          await response.json();
-
-
-        if (result.success) {
-
-          resultBox.className =
-            "success";
-
-          resultBox.textContent =
-            "✅ 資料寫入成功！\n" +
-            "試算表第 " +
-            result.row +
-            " 列";
+            body:
+              JSON.stringify(data)
+          }
+        );
 
 
-          /*
-          清空欄位
-          */
+        /*
+        ========================================
+        因為 no-cors 無法讀取 Apps Script 回應
+        所以這裡只能確認「瀏覽器已送出請求」
 
-          document.getElementById(
-            "location"
-          ).value = "";
+        是否真的成功寫入：
+        請到 Google Sheet 確認
+        ========================================
+        */
 
-          document.getElementById(
-            "species"
-          ).value = "";
+        resultBox.className =
+          "success";
 
-          document.getElementById(
-            "quantity"
-          ).value = "";
+        resultBox.textContent =
+          "✅ 資料已送出！\n\n" +
+          "請到 Google Sheet 確認是否新增資料。";
 
-          document.getElementById(
-            "note"
-          ).value = "";
 
-        } else {
+        /*
+        ========================================
+        清空表單
+        ========================================
+        */
 
-          throw new Error(
-            result.message ||
-            "Apps Script 回傳失敗"
-          );
+        document.getElementById(
+          "location"
+        ).value = "";
 
-        }
+        document.getElementById(
+          "species"
+        ).value = "";
+
+        document.getElementById(
+          "quantity"
+        ).value = "";
+
+        document.getElementById(
+          "note"
+        ).value = "";
 
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          "傳送錯誤：",
+          error
+        );
 
 
         showError(
-          "資料送出失敗。\n\n" +
-          error.message +
-          "\n\n請確認 Apps Script 已正式部署，且權限設定正確。"
+          "送出失敗。\n\n" +
+          "錯誤訊息：" +
+          error.message
         );
 
       } finally {
@@ -707,9 +698,9 @@
 
 
     /*
-    ================================
-    錯誤訊息
-    ================================
+    ==========================================
+    顯示錯誤訊息
+    ==========================================
     */
 
     function showError(message) {
