@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>校園生物資料填報</title>
 
@@ -63,40 +68,6 @@
       margin-bottom: 16px;
     }
 
-    label {
-      display: block;
-      margin-bottom: 7px;
-      font-size: 14px;
-      font-weight: bold;
-      color: #cbd5e1;
-    }
-
-    input,
-    textarea {
-      width: 100%;
-      border: 1px solid #334155;
-      border-radius: 7px;
-      padding: 11px 12px;
-      background: #111c30;
-      color: white;
-      font-size: 14px;
-      outline: none;
-    }
-
-    input:focus,
-    textarea:focus {
-      border-color: #22d3ee;
-    }
-
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
     .gps-title-row {
       display: flex;
       justify-content: space-between;
@@ -133,6 +104,40 @@
       font-size: 12px;
       color: #fbbf24;
       line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #cbd5e1;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid #334155;
+      border-radius: 7px;
+      padding: 11px 12px;
+      background: #111c30;
+      color: white;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #22d3ee;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
     }
 
     .submit-btn {
@@ -201,14 +206,19 @@
   </style>
 </head>
 
+
 <body>
 
-  <!-- 隱藏 iframe，用來接收 Apps Script 回應 -->
+  <!--
+    Apps Script 回傳內容會進到這個隱藏 iframe，
+    所以不會跳離目前網頁。
+  -->
   <iframe
     name="hidden_iframe"
     id="hidden_iframe"
-    style="display:none;">
-  </iframe>
+    style="display:none;"
+  ></iframe>
+
 
   <div class="page">
 
@@ -226,6 +236,8 @@
         時間於送出時自動抓取，GPS 載入時自動偵測。
       </p>
 
+
+      <!-- GPS -->
       <div class="gps-box">
 
         <div class="gps-title-row">
@@ -235,8 +247,8 @@
           </div>
 
           <button
-            class="retry-btn"
             type="button"
+            class="retry-btn"
             onclick="getLocation()"
           >
             重新取得定位
@@ -252,68 +264,126 @@
 
       </div>
 
-      <div class="form-group">
 
-        <label for="location">
-          校園觀察地點 *
-        </label>
+      <!--
+        真正送到 Google Apps Script 的表單
+      -->
+      <form
+        id="recordForm"
 
-        <input
-          type="text"
-          id="location"
-          placeholder="例如：生態池木棧道、操場西側樹林"
-        >
+        action="https://script.google.com/macros/s/AKfycbxVsLnqRp6dcLUBcHYCuIEixSGCs-7Vc8Y-VeiBAerXxw-j3k3tmVykckMS2yeM6I9SRw/exec"
 
-      </div>
+        method="POST"
 
-      <div class="form-group">
-
-        <label for="species">
-          物種名稱 *
-        </label>
-
-        <input
-          type="text"
-          id="species"
-          placeholder="例如：白頭翁"
-        >
-
-      </div>
-
-      <div class="form-group">
-
-        <label for="quantity">
-          數量與單位 *
-        </label>
-
-        <input
-          type="text"
-          id="quantity"
-          placeholder="例如：3 隻、1 棵、大約 10 朵"
-        >
-
-      </div>
-
-      <div class="form-group">
-
-        <label for="note">
-          備註說明（選填）
-        </label>
-
-        <textarea
-          id="note"
-          placeholder="例如：停留在樹枝上、正在草地覓食..."
-        ></textarea>
-
-      </div>
-
-      <button
-        class="submit-btn"
-        id="submitButton"
-        onclick="submitForm()"
+        target="hidden_iframe"
       >
-        📤 送出紀錄
-      </button>
+
+
+        <!-- 日期時間，自動產生 -->
+        <input
+          type="hidden"
+          id="datetime"
+          name="datetime"
+        >
+
+
+        <!-- GPS，自動產生 -->
+        <input
+          type="hidden"
+          id="gps"
+          name="gps"
+        >
+
+
+        <!-- 校園地點 -->
+        <div class="form-group">
+
+          <label for="location">
+            校園觀察地點 *
+          </label>
+
+          <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="例如：生態池木棧道、操場西側樹林"
+            required
+          >
+
+        </div>
+
+
+        <!-- 物種 -->
+        <div class="form-group">
+
+          <label for="species">
+            物種名稱 *
+          </label>
+
+          <input
+            type="text"
+            id="species"
+            name="species"
+            placeholder="例如：白頭翁"
+            required
+          >
+
+        </div>
+
+
+        <!-- 數量 -->
+        <div class="form-group">
+
+          <label for="quantity">
+            數量與單位 *
+          </label>
+
+          <input
+            type="text"
+            id="quantity"
+            name="quantity"
+            placeholder="例如：3 隻、1 棵、大約 10 朵"
+            required
+          >
+
+        </div>
+
+
+        <!--
+          備註
+
+          ★ 最重要：
+          id="note"
+          name="note"
+
+          Apps Script 就會收到：
+          e.parameter.note
+        -->
+        <div class="form-group">
+
+          <label for="note">
+            備註（選填）
+          </label>
+
+          <textarea
+            id="note"
+            name="note"
+            placeholder="例如：在水池邊鳴叫、停留在樹枝上、正在草地覓食..."
+          ></textarea>
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="submit-btn"
+          id="submitButton"
+        >
+          📤 送出紀錄
+        </button>
+
+      </form>
+
 
       <div id="result"></div>
 
@@ -326,16 +396,6 @@
 
     /*
     ==========================================
-    Google Apps Script 正式部署網址
-    ==========================================
-    */
-
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycbxVsLnqRp6dcLUBcHYCuIEixSGCs-7Vc8Y-VeiBAerXxw-j3k3tmVykckMS2yeM6I9SRw/exec";
-
-
-    /*
-    ==========================================
     GPS 儲存變數
     ==========================================
     */
@@ -345,21 +405,32 @@
 
     /*
     ==========================================
-    頁面載入後自動取得 GPS
+    防止連續重複送出
+    ==========================================
+    */
+
+    let submitting = false;
+
+
+    /*
+    ==========================================
+    頁面載入後取得 GPS
     ==========================================
     */
 
     window.addEventListener(
       "load",
       function () {
+
         getLocation();
+
       }
     );
 
 
     /*
     ==========================================
-    取得 GPS
+    GPS 定位
     ==========================================
     */
 
@@ -375,7 +446,9 @@
       gpsStatus.textContent =
         "正在取得定位...";
 
+
       gpsError.textContent = "";
+
 
       gpsValue = "";
 
@@ -386,9 +459,10 @@
           "此瀏覽器不支援 GPS 定位";
 
         gpsError.textContent =
-          "請改用支援定位功能的瀏覽器。";
+          "請使用支援定位功能的瀏覽器。";
 
         return;
+
       }
 
 
@@ -410,7 +484,9 @@
 
 
           gpsStatus.textContent =
-            "定位成功：" + gpsValue;
+            "定位成功：" +
+            gpsValue;
+
 
           gpsError.textContent = "";
 
@@ -423,23 +499,22 @@
             "未取得 GPS";
 
 
-          let message =
-            "定位失敗：";
+          let message = "";
 
 
           switch (error.code) {
 
             case error.PERMISSION_DENIED:
 
-              message +=
-                "你拒絕了定位權限。";
+              message =
+                "你拒絕了定位權限，請在瀏覽器設定中允許位置存取。";
 
               break;
 
 
             case error.POSITION_UNAVAILABLE:
 
-              message +=
+              message =
                 "目前無法取得位置資訊。";
 
               break;
@@ -447,16 +522,16 @@
 
             case error.TIMEOUT:
 
-              message +=
-                "定位逾時，請重新嘗試。";
+              message =
+                "定位逾時，請按「重新取得定位」。";
 
               break;
 
 
             default:
 
-              message +=
-                "發生未知錯誤。";
+              message =
+                "取得定位時發生未知錯誤。";
 
           }
 
@@ -478,304 +553,339 @@
     }
 
 
+
     /*
     ==========================================
-    送出表單
+    表單送出
     ==========================================
     */
 
-    function submitForm() {
-
-      const location =
-        document
-          .getElementById("location")
-          .value
-          .trim();
-
-      const species =
-        document
-          .getElementById("species")
-          .value
-          .trim();
-
-      const quantity =
-        document
-          .getElementById("quantity")
-          .value
-          .trim();
-
-      const note =
-        document
-          .getElementById("note")
-          .value
-          .trim();
-
-      const resultBox =
-        document.getElementById("result");
-
-      const submitButton =
-        document.getElementById("submitButton");
+    const recordForm =
+      document.getElementById("recordForm");
 
 
-      /*
-      ==========================================
-      必填欄位檢查
-      ==========================================
-      */
+    recordForm.addEventListener(
+      "submit",
+      function (event) {
 
-      if (!location) {
-        showError("請輸入校園觀察地點。");
-        return;
-      }
+        /*
+        防止短時間重複送出
+        */
+        if (submitting) {
 
+          event.preventDefault();
 
-      if (!species) {
-        showError("請輸入物種名稱。");
-        return;
-      }
-
-
-      if (!quantity) {
-        showError("請輸入數量與單位。");
-        return;
-      }
-
-
-      /*
-      ==========================================
-      取得送出時間
-      ==========================================
-      */
-
-      const now = new Date();
-
-
-      const datetime =
-        now.toLocaleString(
-          "zh-TW",
-          {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false
-          }
-        );
-
-
-      /*
-      ==========================================
-      顯示送出中
-      ==========================================
-      */
-
-      resultBox.className =
-        "sending";
-
-      resultBox.textContent =
-        "資料傳送中...";
-
-
-      submitButton.disabled =
-        true;
-
-      submitButton.textContent =
-        "傳送中...";
-
-
-      /*
-      ==========================================
-      建立隱藏 form
-      ==========================================
-      */
-
-      const form =
-        document.createElement("form");
-
-
-      form.method =
-        "POST";
-
-
-      form.action =
-        API_URL;
-
-
-      form.target =
-        "hidden_iframe";
-
-
-      form.style.display =
-        "none";
-
-
-      /*
-      ==========================================
-      要送出的資料
-      ==========================================
-      */
-
-      const data = {
-
-        datetime: datetime,
-
-        location: location,
-
-        gps:
-          gpsValue ||
-          "未取得 GPS",
-
-        species: species,
-
-        quantity: quantity,
-
-        note: note
-
-      };
-
-
-      /*
-      ==========================================
-      把資料轉成 hidden input
-      ==========================================
-      */
-
-      Object.keys(data).forEach(
-
-        function (key) {
-
-          const input =
-            document.createElement("input");
-
-
-          input.type =
-            "hidden";
-
-
-          input.name =
-            key;
-
-
-          input.value =
-            data[key];
-
-
-          form.appendChild(input);
+          return;
 
         }
 
-      );
+
+        const location =
+          document
+            .getElementById("location")
+            .value
+            .trim();
 
 
-      /*
-      ==========================================
-      將 form 加入頁面
-      ==========================================
-      */
-
-      document.body.appendChild(
-        form
-      );
+        const species =
+          document
+            .getElementById("species")
+            .value
+            .trim();
 
 
-      /*
-      ==========================================
-      送出 POST
-      ==========================================
-      */
-
-      form.submit();
+        const quantity =
+          document
+            .getElementById("quantity")
+            .value
+            .trim();
 
 
-      /*
-      ==========================================
-      稍等後顯示完成
-      ==========================================
-      */
-
-      setTimeout(
-
-        function () {
-
-          resultBox.className =
-            "success";
+        const note =
+          document
+            .getElementById("note")
+            .value
+            .trim();
 
 
-          resultBox.textContent =
-            "✅ 資料已送出！\n\n" +
-            "請到 Google Sheet 確認是否已新增資料。";
+        /*
+        ========================================
+        額外驗證
+        ========================================
+        */
+
+        if (!location) {
+
+          event.preventDefault();
+
+          showError(
+            "請輸入校園觀察地點。"
+          );
+
+          return;
+
+        }
 
 
-          /*
-          清空輸入欄位
-          */
+        if (!species) {
 
+          event.preventDefault();
+
+          showError(
+            "請輸入物種名稱。"
+          );
+
+          return;
+
+        }
+
+
+        if (!quantity) {
+
+          event.preventDefault();
+
+          showError(
+            "請輸入數量與單位。"
+          );
+
+          return;
+
+        }
+
+
+        /*
+        ========================================
+        設定送出當下時間
+        ========================================
+        */
+
+        const now =
+          new Date();
+
+
+        const datetime =
+          now.toLocaleString(
+            "zh-TW",
+            {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false
+            }
+          );
+
+
+        document
+          .getElementById("datetime")
+          .value =
+            datetime;
+
+
+        /*
+        ========================================
+        設定 GPS
+        ========================================
+        */
+
+        document
+          .getElementById("gps")
+          .value =
+            gpsValue ||
+            "未取得 GPS";
+
+
+        /*
+        ========================================
+        檢查備註
+        ========================================
+
+        這裡只是方便你在電腦 Console 確認。
+
+        即使備註是：
+        在水池邊呱呱呱
+
+        HTML 真正送出的欄位都是：
+
+        name="note"
+        value="在水池邊呱呱呱"
+        ========================================
+        */
+
+        console.log(
+          "準備送出的備註：",
+          note
+        );
+
+
+        /*
+        ========================================
+        顯示送出中
+        ========================================
+        */
+
+        submitting =
+          true;
+
+
+        const submitButton =
           document.getElementById(
-            "location"
-          ).value = "";
+            "submitButton"
+          );
 
 
+        const result =
           document.getElementById(
-            "species"
-          ).value = "";
+            "result"
+          );
 
 
-          document.getElementById(
-            "quantity"
-          ).value = "";
+        submitButton.disabled =
+          true;
 
 
-          document.getElementById(
-            "note"
-          ).value = "";
+        submitButton.textContent =
+          "傳送中...";
 
 
-          /*
-          恢復按鈕
-          */
-
-          submitButton.disabled =
-            false;
+        result.className =
+          "sending";
 
 
-          submitButton.textContent =
-            "📤 送出紀錄";
+        result.textContent =
+          "資料傳送中...";
 
 
-          /*
-          移除暫時建立的 form
-          */
+        /*
+        不要 event.preventDefault()
 
-          form.remove();
+        讓瀏覽器真正執行：
+        <form method="POST">
+        */
 
-        },
+      }
+    );
 
-        1500
-
-      );
-
-    }
 
 
     /*
     ==========================================
-    顯示錯誤訊息
+    iframe 完成載入後
+    視為 POST 已經送出
+    ==========================================
+    */
+
+    const hiddenIframe =
+      document.getElementById(
+        "hidden_iframe"
+      );
+
+
+    hiddenIframe.addEventListener(
+      "load",
+      function () {
+
+        /*
+        頁面剛載入時 iframe 也可能觸發 load，
+        所以只有 submitting === true 才處理。
+        */
+
+        if (!submitting) {
+
+          return;
+
+        }
+
+
+        submitting =
+          false;
+
+
+        const submitButton =
+          document.getElementById(
+            "submitButton"
+          );
+
+
+        const result =
+          document.getElementById(
+            "result"
+          );
+
+
+        /*
+        成功提示
+        */
+
+        result.className =
+          "success";
+
+
+        result.textContent =
+          "✅ 資料已送出！";
+
+
+        /*
+        清空使用者手動輸入欄位
+        */
+
+        document.getElementById(
+          "location"
+        ).value = "";
+
+
+        document.getElementById(
+          "species"
+        ).value = "";
+
+
+        document.getElementById(
+          "quantity"
+        ).value = "";
+
+
+        document.getElementById(
+          "note"
+        ).value = "";
+
+
+        /*
+        恢復按鈕
+        */
+
+        submitButton.disabled =
+          false;
+
+
+        submitButton.textContent =
+          "📤 送出紀錄";
+
+      }
+    );
+
+
+
+    /*
+    ==========================================
+    錯誤提示
     ==========================================
     */
 
     function showError(message) {
 
-      const resultBox =
-        document.getElementById("result");
+      const result =
+        document.getElementById(
+          "result"
+        );
 
 
-      resultBox.className =
+      result.className =
         "error";
 
 
-      resultBox.textContent =
+      result.textContent =
         "❌ " + message;
 
     }
@@ -783,4 +893,5 @@
   </script>
 
 </body>
+
 </html>
